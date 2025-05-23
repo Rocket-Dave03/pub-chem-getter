@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import sys
 from typing import Any
 import logging
 logger = logging.getLogger(__name__)
@@ -26,23 +27,32 @@ def query(args):
 def list(args):
     print(f"list({args})")
 
+    raise NotImplementedError
+
 def main():
     log_level = logging.getLevelNamesMapping()[os.environ["LOG_LEVEL"]] if "LOG_LEVEL" in os.environ else logging.WARN
     logging.basicConfig(level=log_level)
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title="Commnads")
-    list_parser = subparsers.add_parser("list", help="List the currently cached compounds")
-    get_parser = subparsers.add_parser("get", help="List the currently cache compounds")
+
+    list_parser = subparsers.add_parser("list", help="List the contents of the compound cache")
+    list_parser.set_defaults(func=list)
+
+    get_parser = subparsers.add_parser("get", help="Request a compound from the api")
     get_parser.set_defaults(func=get)
-    get_group = get_parser.add_mutually_exclusive_group()
+    get_group = get_parser.add_mutually_exclusive_group(required=True)
     get_group.add_argument("-c", "--cid",  type=int, help="Get compound by cid")
     get_group.add_argument("-n", "--name", type=str, help="Get compound by name")
 
-    query_parser = subparsers.add_parser("query", help="List the currently cache compounds")
+    query_parser = subparsers.add_parser("query", help="Get cached compound info")
     query_parser.set_defaults(func=query)
-    query_group = query_parser.add_mutually_exclusive_group()
+    query_group = query_parser.add_mutually_exclusive_group(required=True)
     query_group.add_argument("-c", "--cid",  type=int, help="Get compound by cid")
     query_group.add_argument("-n", "--name", type=str, help="Get compound by name")
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        return
 
     args = parser.parse_args()
     if getattr(args, "func", None):
