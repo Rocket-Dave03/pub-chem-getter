@@ -6,14 +6,19 @@ import sys
 from typing import Any
 import logging
 logger = logging.getLogger(__name__)
+import pubchempy
+import json
 
+# request
 def get(args):
     logger.info(f"get({args})")
     def fil(kv: tuple[str, Any]) -> bool:
         return kv[1] != None
 
     logger.debug(next(filter(fil, vars(args).items())))
+    raise NotImplementedError
 
+# query compound cache
 def query(args):
     logger.info(f"get({args})")
     def fil(kv: tuple[str, Any]) -> bool:
@@ -21,6 +26,16 @@ def query(args):
 
     id = next(filter(fil, vars(args).items()))
     logger.debug(id)
+
+    comp = None
+
+    if id[0] == "name":
+        comp = pubchempy.get_compounds(id[1],namespace="name")[0]
+    if id[0] == "cid":
+        comp = pubchempy.get_compounds(id[1],namespace="cid")[0]
+
+    logger.info(f"Get compound {json.dumps(comp.record)}")
+    # TODO: Save record to central json file cache
 
     raise NotImplementedError
 
@@ -49,6 +64,7 @@ def main():
     query_group = query_parser.add_mutually_exclusive_group(required=True)
     query_group.add_argument("-c", "--cid",  type=int, help="Get compound by cid")
     query_group.add_argument("-n", "--name", type=str, help="Get compound by name")
+    query_parser.add_argument("-r","--request", help="Request from api if not in cache")
 
     if len(sys.argv) == 1:
         parser.print_help()
