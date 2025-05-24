@@ -1,13 +1,19 @@
 #!/usr/bin/env python3
 
-import argparse
 import os
-import sys
-from typing import Any
 import logging
 logger = logging.getLogger(__name__)
+if __name__ == "__main__":
+    log_level = logging.getLevelNamesMapping()[os.environ["LOG_LEVEL"]] if "LOG_LEVEL" in os.environ else logging.WARN
+    logging.basicConfig(level=log_level)
+
+import argparse
+import sys
+from typing import Any
 import pubchempy
 import json
+
+import cache_file
 
 # request
 def get(args):
@@ -16,7 +22,7 @@ def get(args):
         return kv[1] != None
 
     logger.debug(next(filter(fil, vars(args).items())))
-    raise NotImplementedError
+    # raise NotImplementedError
 
 # query compound cache
 def query(args):
@@ -27,12 +33,13 @@ def query(args):
     id = next(filter(fil, vars(args).items()))
     logger.debug(id)
 
-    comp = None
 
     if id[0] == "name":
         comp = pubchempy.get_compounds(id[1],namespace="name")[0]
-    if id[0] == "cid":
+    elif id[0] == "cid":
         comp = pubchempy.get_compounds(id[1],namespace="cid")[0]
+    else:
+        raise ValueError(f"args[0] was {args[0]} must be on of ['name', 'cid']")
 
     logger.info(f"Get compound {json.dumps(comp.record)}")
     # TODO: Save record to central json file cache
@@ -45,8 +52,6 @@ def list(args):
     raise NotImplementedError
 
 def main():
-    log_level = logging.getLevelNamesMapping()[os.environ["LOG_LEVEL"]] if "LOG_LEVEL" in os.environ else logging.WARN
-    logging.basicConfig(level=log_level)
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title="Commnads")
 

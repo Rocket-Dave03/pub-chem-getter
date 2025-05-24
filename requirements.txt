@@ -1,0 +1,2 @@
+filelock==3.18.0
+PubChemPy==1.0.4
