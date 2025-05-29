@@ -8,8 +8,10 @@ cache_dir_name = "pubchemgetter"
 lock_retry_interval = 1.0 # 1 second
 
 match platform.system():
-    case "Linux" | "Windows":
+    case "Linux":
         cache_dir = os.path.expanduser(os.path.join("~", ".local", "share", f"{cache_dir_name}"))
+    case "Windows":
+        cache_dir = os.path.expanduser(os.path.join("~","AppData","Local", f"{cache_dir_name}"))
     case system:
         raise Exception(f"Unsupported platform {system}")
 
