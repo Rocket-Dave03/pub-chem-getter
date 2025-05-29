@@ -2,6 +2,7 @@ import platform
 import os
 import logging
 import time
+from typing import TextIO
 logger = logging.getLogger(__name__)
 
 cache_dir_name = "pubchemgetter"
@@ -25,7 +26,7 @@ except FileExistsError:
 class LockFile:
     def __init__(self, path: str) -> None:
         self._path = path+'.lock'
-        self._lock = None
+        self._lock: None | TextIO = None
 
     def __enter__(self):
         logger.debug(f"Attempting to create lockfile {self._path}")
@@ -43,6 +44,8 @@ class LockFile:
 
     def __exit__(self, type, value, traceback):
         logger.debug(f"Removing lockfile {self._path}")
+        if not self._lock is None:
+            self._lock.close()
         os.remove(self._path)
 
 
