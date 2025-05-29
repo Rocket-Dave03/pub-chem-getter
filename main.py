@@ -2,6 +2,7 @@
 
 import os
 import logging
+import time
 logger = logging.getLogger(__name__)
 if __name__ == "__main__":
     log_level = logging.getLevelNamesMapping()[os.environ["LOG_LEVEL"]] if "LOG_LEVEL" in os.environ else logging.WARN
@@ -13,7 +14,7 @@ from typing import Any
 import pubchempy
 import json
 
-import cache_file
+from cache_file import CacheFile
 
 # request
 def get(args):
@@ -33,7 +34,27 @@ def query(args):
     id = next(filter(fil, vars(args).items()))
     logger.debug(id)
 
+    with CacheFile("compound_cache.json", 'w') as cache:
+        logger.debug("1")
+        time.sleep(1)
+        logger.debug("2")
+        time.sleep(1)
+        logger.debug("3")
+        time.sleep(1)
+        logger.debug("4")
+        time.sleep(1)
+        logger.debug("5")
+        time.sleep(1)
+        logger.debug("6")
+        time.sleep(1)
+        logger.debug("7")
+        time.sleep(1)
+        logger.debug("8")
+        time.sleep(1)
+        logger.debug("9")
+        time.sleep(1)
 
+    return
     if id[0] == "name":
         comp = pubchempy.get_compounds(id[1],namespace="name")[0]
     elif id[0] == "cid":
