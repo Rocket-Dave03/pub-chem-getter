@@ -51,18 +51,20 @@ class LockFile:
 
 class CacheFile:
     def __init__(self, name: str, opts: str = 'r'):
-        file_path = os.path.join(cache_dir, name)
-        self._lock = LockFile(file_path)
-        self._file = open(file_path, opts)
+        self._file_path = os.path.join(cache_dir, name)
+        self._opts = opts
+        self._lock = LockFile(self._file_path)
 
     def __enter__(self):
         self._lock.__enter__()
+        self._file = open(self._file_path, self._opts)
         return self._file
+
     def __exit__(self, type, value, traceback):
+        self.close(type, value, traceback)
+
+    def close(self, type = None, value = None, traceback = None):
         self._file.close()
         self._lock.__exit__(type, value, traceback)
-
-    def close(self):
-        self._file.close()
 
     # TODO: Implement
