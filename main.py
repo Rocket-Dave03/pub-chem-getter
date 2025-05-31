@@ -52,9 +52,10 @@ def query(args):
         cache.write(c)
 
 def list(args):
-    print(f"list({args})")
-
-    raise NotImplementedError
+    with CacheFile("compound_cache.json") as cache:
+        for record in cache.read().records:
+            compound = pubchempy.Compound(record)
+            print(f"Compound '{compound.iupac_name}', cid: {compound.cid}")
 
 def main():
     parser = argparse.ArgumentParser()
