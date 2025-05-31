@@ -15,6 +15,7 @@ import pubchempy
 import json
 
 from cache_file import CacheFile
+from cache_file import Cache
 
 # request
 def get(args):
@@ -34,38 +35,21 @@ def query(args):
     id = next(filter(fil, vars(args).items()))
     logger.debug(id)
 
-    with CacheFile("compound_cache.json", 'w') as cache:
-        logger.debug("1")
-        time.sleep(1)
-        logger.debug("2")
-        time.sleep(1)
-        logger.debug("3")
-        time.sleep(1)
-        logger.debug("4")
-        time.sleep(1)
-        logger.debug("5")
-        time.sleep(1)
-        logger.debug("6")
-        time.sleep(1)
-        logger.debug("7")
-        time.sleep(1)
-        logger.debug("8")
-        time.sleep(1)
-        logger.debug("9")
-        time.sleep(1)
+    with CacheFile("compound_cache.json") as cache:
+        try:
+            if id[0] == "name":
+                comp = pubchempy.get_compounds(id[1],namespace="name")[0]
+            elif id[0] == "cid":
+                comp = pubchempy.get_compounds(id[1],namespace="cid")[0]
+            else:
+                raise ValueError(f"args[0] was {args[0]} must be on of ['name', 'cid']")
+        except IndexError as e:
+            logger.error(f"Failed to get compound from api: {e}")
+            return
 
-    return
-    if id[0] == "name":
-        comp = pubchempy.get_compounds(id[1],namespace="name")[0]
-    elif id[0] == "cid":
-        comp = pubchempy.get_compounds(id[1],namespace="cid")[0]
-    else:
-        raise ValueError(f"args[0] was {args[0]} must be on of ['name', 'cid']")
-
-    logger.info(f"Get compound {json.dumps(comp.record)}")
-    # TODO: Save record to central json file cache
-
-    raise NotImplementedError
+        c = cache.read() 
+        c.add_record(comp.record) # type: ignore
+        cache.write(c)
 
 def list(args):
     print(f"list({args})")
